@@ -1,0 +1,8 @@
+mmcv==2.1.0
+numpy==1.24.3
+numpy==1.24.4
+onnxruntime==1.18.0
+opencv_python==4.10.0.84
+PyQt5==5.15.11
+PyQt5_sip==12.11.0
+Shapely==2.0.7
