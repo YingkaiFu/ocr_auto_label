@@ -20,6 +20,26 @@ class UniqueListWidget(QListWidget):
         super().addItem(QListWidgetItem(item_text))
         return True
     
+
+class CustomGraphicsView(QGraphicsView):
+    def __init__(self, scene, parent=None):
+        super().__init__(scene, parent)
+        self.setRenderHint(QPainter.Antialiasing)
+        self.setMouseTracking(True)
+        # self.setDragMode(QGraphicsView.ScrollHandDrag)  # 支持拖拽
+        self.setTransformationAnchor(QGraphicsView.AnchorUnderMouse)  # 缩放时以鼠标为中心
+
+    def wheelEvent(self, event):
+        # 缩放因子
+        zoom_factor = 1.2
+        if event.angleDelta().y() > 0:
+            # 放大
+            self.scale(zoom_factor, zoom_factor)
+        else:
+            # 缩小
+            self.scale(1 / zoom_factor, 1 / zoom_factor)
+            
+    
 class ImageItemWidget(QWidget):
     def __init__(self, text, det_color, rec_color, parent=None):
         super().__init__(parent)
@@ -87,9 +107,9 @@ class ImageLabel(QWidget):
 
         self.scene = RotateRectScene()
 
-        self.view = QGraphicsView(self.scene)
+        self.view = CustomGraphicsView(self.scene)
         self.view.setRenderHint(QPainter.Antialiasing)
-        self.scene.setSceneRect(0, 0, 1280, 720)  # 固定场景大小
+        # self.scene.setSceneRect(0, 0, 1280, 720)  # 固定场景大小
         self.view.setMouseTracking(True)
         self.view.setFixedSize(1280, 720)
 

@@ -1,0 +1,33 @@
+{
+    "version": "by rolabeimg convert",
+    "flags": {},
+    "imagePath": "image1.png",
+    "imageHeight": 720,
+    "imageWidth": 1280,
+    "shapes": [
+        {
+            "label": "ocr",
+            "points": [
+                [
+                    972.5437242798354,
+                    501.94508744855966
+                ],
+                [
+                    1038.0497685185185,
+                    488.28125
+                ],
+                [
+                    1047.0497685185185,
+                    533.28125
+                ],
+                [
+                    981.5437242798354,
+                    546.9450874485597
+                ]
+            ],
+            "group_id": null,
+            "shape_type": "polygon",
+            "flags": "28"
+        }
+    ]
+}

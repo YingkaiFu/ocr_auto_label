@@ -209,6 +209,7 @@ class RotateRectScene(QGraphicsScene):
         self.current_image = image_path
         self.pixmap =  QPixmap(image_path)
         self.addPixmap(self.pixmap)
+        # self.setSceneRect(self.pixmap.rect())
     
     def mousePressEvent(self, event):
         if self.current_mode == "annotation":
