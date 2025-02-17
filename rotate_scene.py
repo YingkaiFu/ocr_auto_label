@@ -255,6 +255,15 @@ class RotateRectScene(QGraphicsScene):
             if hasattr(self, 'selected_item') and self.selected_item is not None:
                 self.removeItem(self.selected_item)  # 删除选中的 item
                 self.selected_item = None  # 清空选中的 item
+        if event.key() == Qt.Key_Space:
+            if self.current_mode == "rec_label":
+                if hasattr(self, 'selected_item') and self.selected_item is not None:
+                    item = self.selected_item
+                    roi = np.array([[point.x(), point.y()] for point in item.current_points])
+                    infer_rec_label = rec_infer_roi(self.current_image, roi)
+                    item.rec_item.setDefaultTextColor(self.current_color)
+                    item.rec_item.setPlainText(infer_rec_label[0])
+
         super().keyPressEvent(event)
 
     def set_mode(self, mode):
