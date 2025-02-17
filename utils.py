@@ -167,22 +167,39 @@ def calculate_accuracy(gt_data, pred_data):
         "rec_correct_num": all_rec_box_pred_correct,
     }
 
-def preprocess_image(img: np.array, input_shape: tuple, mean: np.array, std: np.array, to_rgb: bool = True, roi: List[List[float]] = None, return_img = False) -> np.array:
+def convert_image_direction(img: np.array, direction: str) -> np.array:
+    if direction == "rotate_180":
+        img = cv2.rotate(img, cv2.ROTATE_180)
+    elif direction == "rotate_180_mirror":
+        img = cv2.rotate(img, cv2.ROTATE_180)
+        img = cv2.flip(img, 1)
+    elif direction == "mirror":
+        img = cv2.flip(img, 1)
+    return img
+
+def preprocess_image(img: np.array, input_shape: tuple, mean: np.array = np.array([127, 127, 127]), std: np.array = np.array([127, 127, 127]), to_rgb: bool = True, roi: List[List[float]] = None, return_img = False, direction='normal') -> np.array:
     """
     对输入图像进行预处理，包括透视变换、调整大小、归一化和格式转换。
 
     参数:
         img (np.array): 原始 BGR 格式图像。
-        input_shape (tuple): 输入张量的形状 (batch_size, channels, height, width)。
-        mean (np.array): 归一化的均值。
-        std (np.array): 归一化的标准差。
-        to_rgb (bool): 是否将BGR转换为RGB。默认为True。
-        roi (List[List[float]]): 感兴趣区域（ROI）的4个角点坐标。
+        input_shape (tuple): 输入图像的形状。
+        mean (np.array): 图像均值。
+        std (np.array): 图像标准差。
+        to_rgb (bool): 是否转换为 RGB 格式。
+        roi (List[List[float]]): 图像的 ROI 坐标。
+        return_img (bool): 是否返回预处理后的图像。
+        direction (str): 图像处理方向。
 
     返回:
-        np.array: 预处理后的图像张量，适用于 ONNX 推理。
+        np.array: 预处理后的图像张量。
+
     """
-    img = crop_perpective_transform(img, roi)
+    if roi is not None:
+        img = crop_perpective_transform(img, roi)
+
+    img = convert_image_direction(img, direction)
+
     target_h, target_w = input_shape[2], input_shape[3]
 
     # 调整图像大小
@@ -191,7 +208,7 @@ def preprocess_image(img: np.array, input_shape: tuple, mean: np.array, std: np.
     # 归一化图像
     img_normalized = imnormalize(resized_img, mean, std, to_rgb=to_rgb)
 
-    # 转换为 (1, C, H, W) 格式
+    # 转换为 (N, C, H, W) 格式
     img_transposed = img_normalized.transpose(2, 0, 1)[None, :]
 
     if return_img:
@@ -244,11 +261,10 @@ def crop_perpective_transform(image: np.array, points: List[List[float]]) -> np.
     返回:
         np.array: 透视变换后的图像。
     """
-    pts_listed = find_corners(points)
-    pts_src = np.array(pts_listed, dtype=np.float32)
+    pts_src = np.array(points, dtype=np.float32)
     # 计算宽度和高度
-    width = int(pts_src[1][0] - pts_src[0][0])
-    height = int(pts_src[3][1] - pts_src[0][1])
+    width = int(np.linalg.norm(pts_src[1] - pts_src[0]))
+    height = int(np.linalg.norm(pts_src[3] - pts_src[0]))
     pts_dst = np.array([[0, 0], [width - 1, 0], [width - 1, height - 1], [0, height - 1]], dtype=np.float32)
     
     # 计算透视变换矩阵并应用变换
